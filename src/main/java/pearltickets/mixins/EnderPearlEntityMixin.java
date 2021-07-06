@@ -67,7 +67,7 @@ public abstract class EnderPearlEntityMixin extends ThrownItemEntity {
             // next real pos
             this.nextRealPos = this.realPos.add(this.realVelocity);
             this.nextRealVelocity = this.realVelocity.multiply(0.99F).subtract(0, this.getGravity(), 0);
-            if (this.nextRealPos.y <= 0) this.discard();
+            if (this.nextRealPos.y <= 0) this.remove();
 
             // debug
             System.out.println("current: " + this.currentPos + this.currentVelocity +
@@ -82,8 +82,8 @@ public abstract class EnderPearlEntityMixin extends ThrownItemEntity {
 
             // chunk loading
             ServerChunkManager serverChunkManager = ((ServerWorld) world).getChunkManager();
-            System.out.println("isChunkLoaded(nextChunkPos): " + serverChunkManager.isChunkLoaded(nextRealChunkPos.x, nextRealChunkPos.z));
-            if (!serverChunkManager.isChunkLoaded(nextRealChunkPos.x, nextRealChunkPos.z)) {
+            System.out.println("shouldTickChunk(nextChunkPos): " + serverChunkManager.shouldTickChunk(nextRealChunkPos));
+            if (!serverChunkManager.shouldTickChunk(nextRealChunkPos)) {
                 boolean shouldSkipChunkLoading = false;
                 try {
                     // chunk skipping
@@ -139,18 +139,18 @@ public abstract class EnderPearlEntityMixin extends ThrownItemEntity {
     }
 
     // helper function
-    private boolean checkChunkNbtTag(NbtCompound nbtCompound) {
-        boolean chunkStatusFull = nbtCompound != null
-            && nbtCompound.contains("Level", 10)
-            && nbtCompound.getCompound("Level").contains("Heightmaps", 10)
-            && nbtCompound.getCompound("Level").getCompound("Heightmaps").contains("MOTION_BLOCKING", 12);
+    private boolean checkChunkNbtTag(NbtCompound compoundTag) {
+        boolean chunkStatusFull = compoundTag != null
+            && compoundTag.contains("Level", 10)
+            && compoundTag.getCompound("Level").contains("Heightmaps", 10)
+            && compoundTag.getCompound("Level").getCompound("Heightmaps").contains("MOTION_BLOCKING", 12);
 
         // debug
         System.out.println("chunkStatusFull: " + chunkStatusFull);
 
         if (chunkStatusFull) {
             // chunk exists and has been generated before
-            long[] array = nbtCompound.getCompound("Level").getCompound("Heightmaps").getLongArray("MOTION_BLOCKING");
+            long[] array = compoundTag.getCompound("Level").getCompound("Heightmaps").getLongArray("MOTION_BLOCKING");
 
 
             if (array.length != 37) {

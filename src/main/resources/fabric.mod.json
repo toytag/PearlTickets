@@ -3,7 +3,7 @@
   "id": "pearltickets",
   "version": "${version}",
 
-  "name": "Ender Pearl Skippy Chunk Loading",
+  "name": "PearlTickets",
   "description": "Ender pearl can selectively load chunks",
   "authors": [
     "toytag"
@@ -17,19 +17,15 @@
 
   "environment": "*",
   "entrypoints": {
-    "main": [
-      "pearltickets.PearlTicketsInitializer"
-    ]
+    "main": []
   },
   "mixins": [
     "pearltickets.mixins.json"
   ],
 
   "depends": {
-    "fabricloader": ">=0.11.3",
-    "fabric": "*",
-    "minecraft": "1.17.x",
-    "java": ">=16"
+    "fabricloader": ">=0.11.1",
+    "minecraft": "1.16.x"
   },
   "suggests": {
     "another-mod": "*"

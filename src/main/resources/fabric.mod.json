@@ -1,29 +1,28 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "pearltickets",
   "version": "${version}",
 
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "Ender Pearl Skippy Chunk Loading",
+  "description": "Ender pearl can selectively load chunks",
   "authors": [
-    "Me!"
+    "toytag"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "sources": "https://github.com/toytag/PearlTickets"
   },
 
   "license": "CC0-1.0",
-  "icon": "assets/modid/icon.png",
+  "icon": "assets/pearltickets/icon.png",
 
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.fabricmc.example.ExampleMod"
+      "pearltickets.PearlTicketsInitializer"
     ]
   },
   "mixins": [
-    "modid.mixins.json"
+    "pearltickets.mixins.json"
   ],
 
   "depends": {

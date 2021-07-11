@@ -1,4 +1,5 @@
 {
+  "schemaVersion": 1,
   "id": "pearltickets",
   "version": "${version}",
 
@@ -15,9 +16,6 @@
   "icon": "assets/pearltickets/icon.png",
 
   "environment": "*",
-  "entrypoints": {
-    "main": []
-  },
   "mixins": [
     "pearltickets.mixins.json"
   ],

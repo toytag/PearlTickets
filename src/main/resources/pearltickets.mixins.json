@@ -1,12 +1,9 @@
 {
   "required": true,
-  "minVersion": "0.8",
-  "package": "pearltickets",
-  "compatibilityLevel": "JAVA_16",
+  "package": "pearltickets.mixins",
+  "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "mixins.EnderPearlEntityMixin"
-  ],
-  "client": [
+    "EnderPearlEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

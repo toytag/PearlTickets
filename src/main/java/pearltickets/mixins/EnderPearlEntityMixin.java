@@ -83,9 +83,9 @@ public abstract class EnderPearlEntityMixin extends ThrownItemEntity {
             Vec3d nextVelocity = this.realVelocity.multiply(0.99F).subtract(0, this.getGravity(), 0);
 
             // debug
-            System.out.println("curr: " + currPos + currVelocity);
-            System.out.println("real: " + this.realPos + this.realVelocity);
-            System.out.println("next: " + nextPos + nextVelocity);
+            // System.out.println("curr: " + currPos + currVelocity);
+            // System.out.println("real: " + this.realPos + this.realVelocity);
+            // System.out.println("next: " + nextPos + nextVelocity);
 
             // chunkPos to temporarily store pearl and real chunkPos to check chunk loading
             ChunkPos currChunkPos = new ChunkPos((int)Math.floor(currPos.x) >> 4, (int)Math.floor(currPos.z) >> 4);
@@ -93,8 +93,8 @@ public abstract class EnderPearlEntityMixin extends ThrownItemEntity {
             ChunkPos nextChunkPos = new ChunkPos((int)Math.floor(nextPos.x) >> 4, (int)Math.floor(nextPos.z) >> 4);
 
             // debug
-            System.out.printf("currChunkPos: (%d, %d)\t realChunkPos: (%d, %d)\t nextChunkPos: (%d, %d)\n",
-                    currChunkPos.x, currChunkPos.z, realChunkPos.x, realChunkPos.z, nextChunkPos.x, nextChunkPos.z);
+            // System.out.printf("currChunkPos: (%d, %d)\t realChunkPos: (%d, %d)\t nextChunkPos: (%d, %d)\n",
+            //         currChunkPos.x, currChunkPos.z, realChunkPos.x, realChunkPos.z, nextChunkPos.x, nextChunkPos.z);
 
             // chunk loading
             ServerChunkManager serverChunkManager = ((ServerWorld) world).getChunkManager();
@@ -108,7 +108,7 @@ public abstract class EnderPearlEntityMixin extends ThrownItemEntity {
                     e.printStackTrace();
                 }
 
-                System.out.println(this.realPos.y + " " + highestMotionBlockingY + " " + nextPos.y);
+                // System.out.println(this.realPos.y + " " + highestMotionBlockingY + " " + nextPos.y);
 
                 // skip chunk loading
                 if (this.realPos.y > highestMotionBlockingY && nextPos.y > highestMotionBlockingY) {

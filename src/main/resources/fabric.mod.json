@@ -16,15 +16,12 @@
   "icon": "assets/pearltickets/icon.png",
 
   "environment": "*",
-  "entrypoints": {
-    "main": []
-  },
   "mixins": [
     "pearltickets.mixins.json"
   ],
 
   "depends": {
-    "fabricloader": ">=0.11.3",
+    "fabricloader": ">=0.11.1",
     "minecraft": "1.17.x",
     "java": ">=16"
   },

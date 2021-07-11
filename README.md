@@ -1,6 +1,6 @@
 # PearlTickets
 
-This mod allows Ender Pearl to selectively load chunks.
+This mod allows `Ender Pearl` to selectively load chunks.
 
 ## License
 

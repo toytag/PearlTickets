@@ -1,5 +1,4 @@
 {
-  "schemaVersion": 1,
   "id": "pearltickets",
   "version": "${version}",
 
@@ -26,8 +25,5 @@
   "depends": {
     "fabricloader": ">=0.11.1",
     "minecraft": "1.16.x"
-  },
-  "suggests": {
-    "another-mod": "*"
   }
 }

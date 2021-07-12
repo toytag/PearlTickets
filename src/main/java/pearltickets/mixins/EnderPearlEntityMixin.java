@@ -111,7 +111,9 @@ public abstract class EnderPearlEntityMixin extends ThrownItemEntity {
                 // System.out.println(this.realPos.y + " " + highestMotionBlockingY + " " + nextPos.y);
 
                 // skip chunk loading
-                if (this.realPos.y > highestMotionBlockingY && nextPos.y > highestMotionBlockingY) {
+                if (this.realPos.y > highestMotionBlockingY
+                        && nextPos.y > highestMotionBlockingY
+                        && nextPos.y + nextVelocity.y > highestMotionBlockingY) {
                     // stay put
                     serverChunkManager.addTicket(ENDER_PEARL_TICKET, currChunkPos, 2, currChunkPos);
                     this.setVelocity(Vec3d.ZERO);

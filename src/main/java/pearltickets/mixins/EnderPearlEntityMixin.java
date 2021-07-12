@@ -28,6 +28,7 @@ import java.util.Comparator;
 
 @Mixin(EnderPearlEntity.class)
 public abstract class EnderPearlEntityMixin extends ThrownItemEntity {
+    private static final int MIN_Y = 0;
     private static final ChunkTicketType<ChunkPos> ENDER_PEARL_TICKET =
             ChunkTicketType.create("ender_pearl", Comparator.comparingLong(ChunkPos::toLong), 2);
 
@@ -44,7 +45,7 @@ public abstract class EnderPearlEntityMixin extends ThrownItemEntity {
     }
 
     private static int getHighestMotionBlockingY(NbtCompound nbtCompound) {
-        int highestY = -64;
+        int highestY = MIN_Y;
         if (nbtCompound != null) {
             // vanilla 1.16+
             for (long element : nbtCompound.getCompound("Level")
@@ -99,7 +100,7 @@ public abstract class EnderPearlEntityMixin extends ThrownItemEntity {
             // chunk loading
             ServerChunkManager serverChunkManager = ((ServerWorld) world).getChunkManager();
             if (!isEntityTickingChunk(serverChunkManager.getWorldChunk(nextChunkPos.x, nextChunkPos.z))) {
-                int highestMotionBlockingY = -64;
+                int highestMotionBlockingY = MIN_Y;
                 try {
                     NbtCompound nbtCompound = serverChunkManager.threadedAnvilChunkStorage.getNbt(nextChunkPos);
                     highestMotionBlockingY = getHighestMotionBlockingY(nbtCompound);
@@ -111,7 +112,9 @@ public abstract class EnderPearlEntityMixin extends ThrownItemEntity {
                 // System.out.println(this.realPos.y + " " + highestMotionBlockingY + " " + nextPos.y);
 
                 // skip chunk loading
-                if (this.realPos.y > highestMotionBlockingY && nextPos.y > highestMotionBlockingY) {
+                if (this.realPos.y > highestMotionBlockingY &&
+                        nextPos.y > highestMotionBlockingY &&
+                        nextPos.y + nextVelocity.y > highestMotionBlockingY) {
                     // stay put
                     serverChunkManager.addTicket(ENDER_PEARL_TICKET, currChunkPos, 2, currChunkPos);
                     this.setVelocity(Vec3d.ZERO);

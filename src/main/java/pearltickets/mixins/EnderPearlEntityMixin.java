@@ -9,6 +9,7 @@ import net.minecraft.server.world.ChunkHolder;
 import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -22,12 +23,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 // Java
 import java.io.IOException;
-import java.lang.Math;
 import java.util.Comparator;
 
 
 @Mixin(EnderPearlEntity.class)
 public abstract class EnderPearlEntityMixin extends ThrownItemEntity {
+    private static final int MIN_Y = 0;
     private static final ChunkTicketType<ChunkPos> ENDER_PEARL_TICKET =
             ChunkTicketType.create("ender_pearl", Comparator.comparingLong(ChunkPos::toLong), 2);
 
@@ -44,7 +45,7 @@ public abstract class EnderPearlEntityMixin extends ThrownItemEntity {
     }
 
     private static int getHighestMotionBlockingY(NbtCompound nbtCompound) {
-        int highestY = -64;
+        int highestY = Integer.MIN_VALUE;
         if (nbtCompound != null) {
             // vanilla 1.16+
             for (long element : nbtCompound.getCompound("Level")
@@ -60,13 +61,8 @@ public abstract class EnderPearlEntityMixin extends ThrownItemEntity {
         return highestY;
     }
 
-    @Inject(method = "tick()V", at = @At("HEAD"))
-    private void preprocess(CallbackInfo ci) {
-        this.skippyChunkLoading();
-    }
-
-    // preprocess main function
-    private void skippyChunkLoading() {
+    @Inject(method = "tick", at = @At(value = "HEAD"))
+    private void skippyChunkLoading(CallbackInfo ci) {
         World world = this.getEntityWorld();
 
         if (world instanceof ServerWorld) {
@@ -81,34 +77,33 @@ public abstract class EnderPearlEntityMixin extends ThrownItemEntity {
             // next pos
             Vec3d nextPos = this.realPos.add(this.realVelocity);
             Vec3d nextVelocity = this.realVelocity.multiply(0.99F).subtract(0, this.getGravity(), 0);
+            if (nextPos.y < MIN_Y) this.discard();
 
-            // debug
-            // System.out.println("curr: " + currPos + currVelocity);
-            // System.out.println("real: " + this.realPos + this.realVelocity);
-            // System.out.println("next: " + nextPos + nextVelocity);
+//            System.out.println("curr: " + currPos + currVelocity);
+//            System.out.println("real: " + this.realPos + this.realVelocity);
+//            System.out.println("next: " + nextPos + nextVelocity);
 
-            // chunkPos to temporarily store pearl and real chunkPos to check chunk loading
-            ChunkPos currChunkPos = new ChunkPos((int)Math.floor(currPos.x) >> 4, (int)Math.floor(currPos.z) >> 4);
-            ChunkPos realChunkPos = new ChunkPos((int)Math.floor(this.realPos.x) >> 4, (int)Math.floor(this.realPos.z) >> 4);
-            ChunkPos nextChunkPos = new ChunkPos((int)Math.floor(nextPos.x) >> 4, (int)Math.floor(nextPos.z) >> 4);
+            // chunkPos to temporarily store pearl and next chunkPos to check chunk loading
+            ChunkPos currChunkPos = new ChunkPos(new BlockPos(currPos));
+            ChunkPos nextChunkPos = new ChunkPos(new BlockPos(nextPos));
 
-            // debug
-            // System.out.printf("currChunkPos: (%d, %d)\t realChunkPos: (%d, %d)\t nextChunkPos: (%d, %d)\n",
-            //         currChunkPos.x, currChunkPos.z, realChunkPos.x, realChunkPos.z, nextChunkPos.x, nextChunkPos.z);
+//            System.out.printf("currChunkPos: (%d, %d)    realChunkPos: (%d, %d)    nextChunkPos: (%d, %d)\n",
+//                 currChunkPos.x, currChunkPos.z, realChunkPos.x, realChunkPos.z, nextChunkPos.x, nextChunkPos.z);
 
             // chunk loading
             ServerChunkManager serverChunkManager = ((ServerWorld) world).getChunkManager();
-            if (!isEntityTickingChunk(serverChunkManager.getWorldChunk(nextChunkPos.x, nextChunkPos.z))) {
-                int highestMotionBlockingY = -64;
+            if (!this.sync || !isEntityTickingChunk(serverChunkManager.getWorldChunk(nextChunkPos.x, nextChunkPos.z))) {
+                int highestMotionBlockingY = Integer.MIN_VALUE;
                 try {
-                    NbtCompound nbtCompound = serverChunkManager.threadedAnvilChunkStorage.getNbt(nextChunkPos);
-                    highestMotionBlockingY = getHighestMotionBlockingY(nbtCompound);
+                    highestMotionBlockingY = Integer.max(
+                        getHighestMotionBlockingY(serverChunkManager.threadedAnvilChunkStorage.getNbt(currChunkPos)),
+                        getHighestMotionBlockingY(serverChunkManager.threadedAnvilChunkStorage.getNbt(nextChunkPos)));
                 } catch (IOException e) {
                     System.out.println("getNbt IOException");
                     e.printStackTrace();
                 }
 
-                // System.out.println(this.realPos.y + " " + highestMotionBlockingY + " " + nextPos.y);
+//                System.out.println(this.realPos.y + " " + highestMotionBlockingY + " " + nextPos.y);
 
                 // skip chunk loading
                 if (this.realPos.y > highestMotionBlockingY
@@ -117,27 +112,14 @@ public abstract class EnderPearlEntityMixin extends ThrownItemEntity {
                     // stay put
                     serverChunkManager.addTicket(ENDER_PEARL_TICKET, currChunkPos, 2, currChunkPos);
                     this.setVelocity(Vec3d.ZERO);
-                    this.updatePosition(currPos);
+                    this.setPosition(currPos);
                     this.sync = false;
                 } else {
                     // move
-                    serverChunkManager.addTicket(ENDER_PEARL_TICKET, realChunkPos, 2, realChunkPos);
-                    this.setVelocity(this.realVelocity);
-                    this.updatePosition(this.realPos);
-                    this.sync = true;
                     serverChunkManager.addTicket(ENDER_PEARL_TICKET, nextChunkPos, 2, nextChunkPos);
-                }
-            } else {
-                if (!this.sync) {
-                    // move
-                    serverChunkManager.addTicket(ENDER_PEARL_TICKET, realChunkPos, 2, realChunkPos);
                     this.setVelocity(this.realVelocity);
-                    this.updatePosition(this.realPos);
+                    this.setPosition(this.realPos);
                     this.sync = true;
-                    serverChunkManager.addTicket(ENDER_PEARL_TICKET, nextChunkPos, 2, nextChunkPos);
-                } else {
-                    // nothing happens
-                    serverChunkManager.addTicket(ENDER_PEARL_TICKET, currChunkPos, 2, currChunkPos);
                 }
             }
 
@@ -145,11 +127,6 @@ public abstract class EnderPearlEntityMixin extends ThrownItemEntity {
             this.realPos = nextPos;
             this.realVelocity = nextVelocity;
         }
-    }
-
-    // helper function
-    private void updatePosition(Vec3d pos) {
-        super.updatePosition(pos.x, pos.y, pos.z);
     }
 
 }

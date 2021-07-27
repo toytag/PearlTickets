@@ -29,7 +29,6 @@ import java.util.Comparator;
 
 @Mixin(ThrownEnderpearlEntity.class)
 public abstract class EnderPearlEntityMixin extends ThrownItemEntity {
-    private static final int MIN_Y = 0;
     private static final ChunkTicketType<ChunkPos> ENDER_PEARL_TICKET =
             ChunkTicketType.create("ender_pearl", Comparator.comparingLong(ChunkPos::toLong), 2);
 
@@ -78,7 +77,6 @@ public abstract class EnderPearlEntityMixin extends ThrownItemEntity {
             // next pos
             Vec3d nextPos = this.realPos.add(this.realVelocity);
             Vec3d nextVelocity = this.realVelocity.multiply(0.99F).subtract(0, this.getGravity(), 0);
-            if (nextPos.y < MIN_Y) this.remove();
 
             // chunkPos to temporarily store pearl and next chunkPos to check chunk loading
             ChunkPos currChunkPos = new ChunkPos(new BlockPos(currPos));

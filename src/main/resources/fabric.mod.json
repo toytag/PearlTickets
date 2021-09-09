@@ -9,7 +9,9 @@
     "toytag"
   ],
   "contact": {
-    "sources": "https://github.com/toytag/PearlTickets"
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/pearltickets",
+    "sources": "https://github.com/toytag/PearlTickets",
+    "issues": "https://github.com/toytag/PearlTickets/issues"
   },
 
   "license": "CC0-1.0",

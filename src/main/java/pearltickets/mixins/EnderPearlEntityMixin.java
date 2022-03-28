@@ -16,6 +16,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
 
 // Mixin
+import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -46,12 +47,11 @@ public abstract class EnderPearlEntityMixin extends ThrownItemEntity {
     private static int getHighestMotionBlockingY(NbtCompound nbtCompound) {
         int highestY = Integer.MIN_VALUE;
         if (nbtCompound != null) {
-            // vanilla 1.16+
-            for (long element : nbtCompound.getCompound("Level")
-                    .getCompound("Heightmaps").getLongArray("MOTION_BLOCKING")) {
+            // vanilla 1.18+
+            for (long element : nbtCompound.getCompound("Heightmaps").getLongArray("MOTION_BLOCKING")) {
                 // 64 bits in long, 7 y-values * 9-bit-each = 63 bits, and 1 bit vacant.
                 for (int i = 0; i < 7; i++) {
-                    int y = (int)(element & 0b111111111);
+                    int y = (int)(element & 0b111111111) - 1;
                     if (y > highestY) highestY = y;
                     element = element >> 9;
                 }
@@ -102,6 +102,10 @@ public abstract class EnderPearlEntityMixin extends ThrownItemEntity {
                 }
 
 //                System.out.println(this.realPos.y + " " + highestMotionBlockingY + " " + nextPos.y);
+
+                // compatible with none-zero minimum y value dimension
+                DimensionType worldDimension = world.getDimension();
+                highestMotionBlockingY += worldDimension.getMinimumY();
 
                 // skip chunk loading
                 if (this.realPos.y > highestMotionBlockingY

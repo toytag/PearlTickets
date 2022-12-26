@@ -23,8 +23,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 // Java
-import java.io.IOException;
 import java.util.Comparator;
+import java.util.concurrent.ExecutionException;
 
 
 @Mixin(EnderPearlEntity.class)
@@ -91,21 +91,22 @@ public abstract class EnderPearlEntityMixin extends ThrownItemEntity {
             // chunk loading
             ServerChunkManager serverChunkManager = ((ServerWorld) world).getChunkManager();
             if (!this.sync || !isEntityTickingChunk(serverChunkManager.getWorldChunk(nextChunkPos.x, nextChunkPos.z))) {
-                int highestMotionBlockingY = Integer.MIN_VALUE;
+                NbtCompound nbtCompound1;
+                NbtCompound nbtCompound2;
                 try {
-                    highestMotionBlockingY = Integer.max(
-                        getHighestMotionBlockingY(serverChunkManager.threadedAnvilChunkStorage.getNbt(currChunkPos)),
-                        getHighestMotionBlockingY(serverChunkManager.threadedAnvilChunkStorage.getNbt(nextChunkPos)));
-                } catch (IOException e) {
-                    System.out.println("getNbt IOException");
-                    e.printStackTrace();
+                    nbtCompound1 = serverChunkManager.threadedAnvilChunkStorage.getNbt(currChunkPos).get().orElse(null);
+                    nbtCompound2 = serverChunkManager.threadedAnvilChunkStorage.getNbt(nextChunkPos).get().orElse(null);
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new RuntimeException("NbtCompound exception");
                 }
+
+                int highestMotionBlockingY = Integer.max(getHighestMotionBlockingY(nbtCompound1), getHighestMotionBlockingY(nbtCompound2));
 
 //                System.out.println(this.realPos.y + " " + highestMotionBlockingY + " " + nextPos.y);
 
                 // compatible with none-zero minimum y value dimension
                 DimensionType worldDimension = world.getDimension();
-                highestMotionBlockingY += worldDimension.getMinimumY();
+                highestMotionBlockingY += worldDimension.minY();
 
                 // skip chunk loading
                 if (this.realPos.y > highestMotionBlockingY

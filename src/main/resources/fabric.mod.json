@@ -4,7 +4,7 @@
   "version": "${version}",
 
   "name": "PearlTickets",
-  "description": "Ender pearl can selectively load chunks",
+  "description": "Ender Pearls shoot by Ender Pearl Cannons can selectively load chunks that it will pass\n珍珠炮打出的末影珍珠可以加载前方即将通过的区块",
   "authors": [
     "toytag",
     "D1ngtalk[1.18]",
